@@ -7,20 +7,15 @@ class ZoomClient:
         self.client_secret = client_secret
         self.access_token = self.get_access_token()
 
-
     def get_access_token(self):
         data = {
-            "grant_type": "client_credentials",
+            "grant_type": "account_credentials",
+            "account_id": self.account_id,
             "client_id": self.client_id,
             "client_secret": self.client_secret
         }
-        try:
-            response = requests.post("https://zoom.us/oauth/token", data=data)
-            response.raise_for_status()  # Raise exception for HTTP error status codes
-            return response.json()["access_token"]
-        except requests.RequestException as e:
-            print("Error retrieving access token:", e)
-            return None  # Return None on error
+        response = requests.post("https://zoom.us/oauth/token", data=data)
+        return response.json()["access_token"]
 
 
     def get_recordings(self):
