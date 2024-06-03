@@ -1,4 +1,6 @@
 import requests
+import os
+import glob
 
 class ZoomClient:
     def __init__(self, account_id, client_id, client_secret) -> None:
@@ -62,6 +64,30 @@ class ZoomApp:
         else:
             raise KeyError(f"'{key}' not found")
 
+    def get_local_path(self):
+        # Default directory paths where Zoom recordings might be stored
+        default_paths = [
+            os.path.join(os.path.expanduser("~"), "Documents", "Zoom"),
+            os.path.join(os.path.expanduser("~"), "Zoom"),
+        ]
+
+        for path in default_paths:
+            print(path)
+            if os.path.exists(path):
+                return path
+
+        return None
+
+
+
+    def get_latest_mp4_file(self, directory):
+        mp4_files = glob.glob(os.path.join(directory, "*.mp4"))
+        if mp4_files:
+            latest_mp4_file = max(mp4_files, key=os.path.getmtime)
+            return latest_mp4_file
+        else:
+            return None
+
     def run(self):
         
         recs = self.client.get_recordings()
@@ -76,4 +102,17 @@ class ZoomApp:
 
         except Exception as e:
             print("No meetings to transcribe.")
+
+        # try:
+            # zoom_directory = self.get_local_path()
+            # latest_mp4_file = self.get_latest_mp4_file(zoom_directory)
+            # if latest_mp4_file:
+            #     print("Latest MP4 file found:", latest_mp4_file)
+                #  Now you can do further processing with the MP4 file
+            # else:
+            #    print("No MP4 files found in Zoom recordings directory.")
+            # transcript = self['transcriber'].transcribe(latest_mp4_file)
+            # print(transcript.text)
+        # except:
+            # print("No zoom found")
 
