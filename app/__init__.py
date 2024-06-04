@@ -2,7 +2,7 @@ import os
 import assemblyai as aai
 from dotenv import load_dotenv
 
-from .transcript import ZoomClient, ZoomApp
+from .zoom_manager import ZoomClient, ZoomApp
 
 load_dotenv()
 
