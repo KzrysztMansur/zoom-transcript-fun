@@ -1,5 +1,6 @@
 import requests
 import os
+import datetime
 import glob
 
 class ZoomClient:
@@ -53,6 +54,7 @@ class ZoomApp:
         for key, value in add_ons.items():
             setattr(self, key, value)
 
+
     def __getitem__(self, key):
         
         if key == 'client':
@@ -64,6 +66,7 @@ class ZoomApp:
         else:
             raise KeyError(f"'{key}' not found")
 
+
     def get_local_path(self):
         # Default directory paths where Zoom recordings might be stored
         default_paths = [
@@ -72,12 +75,25 @@ class ZoomApp:
         ]
 
         for path in default_paths:
-            print(path)
             if os.path.exists(path):
                 return path
 
         return None
 
+
+    def get_newest_folder(self):
+        folders = []
+        for entry in os.scandir(self.get_local_path()):
+            if entry.is_dir():
+                folder_path = entry.path  # Get the full path of the folder
+                folder_time = os.path.getmtime(folder_path)  # Get modification time
+                folders.append((folder_time, folder_path))
+
+        if not folders:
+            return None
+
+        newest_folder = max(folders, key=lambda x: x[0])[1]  # Get only the path
+        return newest_folder
 
 
     def get_latest_mp4_file(self, directory):
@@ -87,6 +103,7 @@ class ZoomApp:
             return latest_mp4_file
         else:
             return None
+
 
     def run(self):
         
@@ -103,16 +120,15 @@ class ZoomApp:
         except Exception as e:
             print("No meetings to transcribe.")
 
-        # try:
-            # zoom_directory = self.get_local_path()
-            # latest_mp4_file = self.get_latest_mp4_file(zoom_directory)
-            # if latest_mp4_file:
-            #     print("Latest MP4 file found:", latest_mp4_file)
-                #  Now you can do further processing with the MP4 file
-            # else:
-            #    print("No MP4 files found in Zoom recordings directory.")
-            # transcript = self['transcriber'].transcribe(latest_mp4_file)
-            # print(transcript.text)
-        # except:
-            # print("No zoom found")
-
+        try:
+            zoom_directory = self.get_newest_folder()
+            latest_mp4_file = self.get_latest_mp4_file(zoom_directory)
+            if latest_mp4_file:
+                print("Latest MP4 file found:", latest_mp4_file)
+                # Now you can do further processing with the MP4 file
+            else:
+               print("No MP4 files found in Zoom recordings directory.")
+            transcript = self['transcriber'].transcribe(latest_mp4_file)
+            print(transcript.text)
+        except:
+            print("No zoom found")
