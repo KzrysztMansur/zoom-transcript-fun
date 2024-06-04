@@ -5,12 +5,24 @@ import glob
 
 class ZoomClient:
     def __init__(self, account_id, client_id, client_secret) -> None:
+        """ This is the code in charge of the zoom client actions and all the API management
+
+        Args:
+            account_id (str): is the id of my API keys for my account
+            client_id (str): this is my client id from the zoom API
+            client_secret (str): this is another key for the zoom API
+        """
         self.account_id = account_id
         self.client_id = client_id
         self.client_secret = client_secret
         self.access_token = self.get_access_token()
 
     def get_access_token(self):
+        """ sends a request for the access token to the link for the zoom
+
+        Returns:
+            str: it returns the access token key
+        """
         data = {
             "grant_type": "account_credentials",
             "account_id": self.account_id,
@@ -22,6 +34,11 @@ class ZoomClient:
 
 
     def get_recordings(self):
+        """it sends a request to get the url of the could recordings
+
+        Returns:
+            str: returns the urls for where the meet recordings get saved in the zoom cloud.
+        """
         headers = {
             "Authorization": f"Bearer {self.access_token}"
         }
@@ -31,6 +48,14 @@ class ZoomClient:
 
 
     def get_download_url(self, meeting_id):
+        """it gets the access so I can use the recordings locally
+
+        Args:
+            meeting_id (int): is to find the specific last meeting in the cloud
+
+        Returns:
+            _type_: _description_
+        """
         headers = {
             "Authorization": f"Bearer {self.access_token}"
         }
@@ -46,6 +71,9 @@ class ZoomClient:
 
 
 class ZoomApp:
+    """_summary_
+        this is a wrapper class for the main functionality of the application
+    """
     def __init__(self, client, **add_ons) -> None:
         self.client = client
         self.add_ons = add_ons
@@ -56,6 +84,14 @@ class ZoomApp:
 
 
     def __getitem__(self, key):
+        """sumary_line access the members of this class like in a dictionary
+        
+        Keyword arguments: 
+        transcriber -- it is to add a transcriber
+        
+        Return: it is to add dictionary functionality
+        """
+        
         
         if key == 'client':
             return getattr(self, key)
@@ -68,9 +104,14 @@ class ZoomApp:
 
 
     def get_local_path(self):
-        # Default directory paths where Zoom recordings might be stored
+        """this is to get the where the Zoom folder is in the computer with OS agnostic methods
+
+        Returns:
+            str: gets the local path of the Zoom no matter the OS
+        """
         default_paths = [
             os.path.join(os.path.expanduser("~"), "Documents", "Zoom"),
+            os.path.join(os.path.expanduser("~"), "Documentos", "Zoom"),
             os.path.join(os.path.expanduser("~"), "Zoom"),
         ]
 
@@ -82,6 +123,11 @@ class ZoomApp:
 
 
     def get_newest_folder(self):
+        """its to get exactly the lasts metting recording for local
+
+        Returns:
+            str: the path to last recording
+        """
         folders = []
         for entry in os.scandir(self.get_local_path()):
             if entry.is_dir():
@@ -97,6 +143,14 @@ class ZoomApp:
 
 
     def get_latest_mp4_file(self, directory):
+        """gets the last mp4 file to be saved in the computer
+
+        Args:
+            directory (str): it needs to know the directory of the folder where the last meet was
+
+        Returns:
+            str: returns the mp4 file 
+        """
         mp4_files = glob.glob(os.path.join(directory, "*.mp4"))
         if mp4_files:
             latest_mp4_file = max(mp4_files, key=os.path.getmtime)
@@ -129,6 +183,6 @@ class ZoomApp:
             else:
                print("No MP4 files found in Zoom recordings directory.")
             transcript = self['transcriber'].transcribe(latest_mp4_file)
-            print(transcript.text)
-        except:
-            print("No zoom found")
+            print(transcript)
+        except Exception as e:
+            print("No zoom found: ", e)
