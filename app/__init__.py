@@ -1,5 +1,4 @@
-import os 
-import assemblyai as aai
+import os
 from dotenv import load_dotenv
 
 from .zoom_manager import ZoomClient, ZoomApp
@@ -10,7 +9,6 @@ load_dotenv()
 ZOOM_ACCOUNT_ID = os.environ.get("ZOOM_ACCOUNT_ID")
 ZOOM_CLIENT_ID = os.environ.get("ZOOM_CLIENT_ID")
 ZOOM_CLIENT_SECRET = os.environ.get("ZOOM_CLIENT_SECRET")
-# aai.settings.api_key = os.environ.get("ASSEMBLYAI_API_KEY")
 
 
 transcriber = Transcriber()
