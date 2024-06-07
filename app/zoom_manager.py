@@ -3,6 +3,7 @@ import os
 import datetime
 import glob
 
+
 class ZoomClient:
     def __init__(self, account_id, client_id, client_secret) -> None:
         """ This is the code in charge of the zoom client actions and all the API management
@@ -32,7 +33,6 @@ class ZoomClient:
         response = requests.post("https://zoom.us/oauth/token", data=data)
         return response.json()["access_token"]
 
-
     def get_recordings(self):
         """it sends a request to get the url of the could recordings
 
@@ -45,7 +45,6 @@ class ZoomClient:
         url = "https://api.zoom.us/v2/users/me/recordings"
 
         return requests.get(url, headers).json()
-
 
     def get_download_url(self, meeting_id):
         """it gets the access so I can use the recordings locally
@@ -63,8 +62,8 @@ class ZoomClient:
 
         r = requests.get(url, headers=headers).json()
 
-        url = [i["download_url"] for i in r['recording_files'] 
-        if i['recording_type'] == 'audio_only'][0]
+        url = [i["download_url"] for i in r['recording_files']
+               if i['recording_type'] == 'audio_only'][0]
         download_link = f'{url}?access_token={self.access_token}&playback_access_token={r['password']}'
 
         return download_link
@@ -74,6 +73,7 @@ class ZoomApp:
     """_summary_
         this is a wrapper class for the main functionality of the application
     """
+
     def __init__(self, client, **add_ons) -> None:
         self.client = client
         self.add_ons = add_ons
@@ -81,7 +81,6 @@ class ZoomApp:
         # for add-ons like the artificial inteligence and the transcriber
         for key, value in add_ons.items():
             setattr(self, key, value)
-
 
     def __getitem__(self, key):
         """sumary_line access the members of this class like in a dictionary
@@ -91,17 +90,15 @@ class ZoomApp:
         
         Return: it is to add dictionary functionality
         """
-        
-        
+
         if key == 'client':
             return getattr(self, key)
-        
+
         elif key in self.add_ons:
             return self.add_ons[key]
 
         else:
             raise KeyError(f"'{key}' not found")
-
 
     def get_local_path(self):
         """this is to get the where the Zoom folder is in the computer with OS agnostic methods
@@ -120,7 +117,6 @@ class ZoomApp:
                 return path
 
         return None
-
 
     def get_newest_folder(self):
         """its to get exactly the lasts metting recording for local
@@ -141,7 +137,6 @@ class ZoomApp:
         newest_folder = max(folders, key=lambda x: x[0])[1]  # Get only the path
         return newest_folder
 
-
     def get_latest_mp4_file(self, directory):
         """gets the last mp4 file to be saved in the computer
 
@@ -158,13 +153,12 @@ class ZoomApp:
         else:
             return None
 
-
     def run(self):
-        
+
         recs = self.client.get_recordings()
         print(recs)
         try:
-            rec_id= recs["meetings"][0]['id']
+            rec_id = recs["meetings"][0]['id']
             my_url = self["client"].get_download_url(rec_id)
             transcript = self['transcriber'].transcribe(my_url)
             print(transcript.text)
@@ -181,7 +175,7 @@ class ZoomApp:
                 print("Latest MP4 file found:", latest_mp4_file)
                 # Now you can do further processing with the MP4 file
             else:
-               print("No MP4 files found in Zoom recordings directory.")
+                print("No MP4 files found in Zoom recordings directory.")
             transcript = self['transcriber'].transcribe(latest_mp4_file)
             print(transcript)
         except Exception as e:
