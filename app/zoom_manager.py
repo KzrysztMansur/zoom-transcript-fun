@@ -177,6 +177,13 @@ class ZoomApp:
             else:
                 print("No MP4 files found in Zoom recordings directory.")
             transcript = self['transcriber'].transcribe(latest_mp4_file)
-            print(transcript)
+            for speaker, speech in transcript:
+                print(f"speaker {speaker}: {speech}")
+
+            try:
+                os.remove("extracted_audio.wav")
+            except Exception as e:
+                pass
+
         except Exception as e:
             print("No zoom found: ", e)
